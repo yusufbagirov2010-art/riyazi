@@ -5,775 +5,807 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NotDefteri — Cədvəl & Qeydlər</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
-            --bg: #0f1117;
-            --bg2: #161821;
-            --bg3: #1c1f2b;
-            --card: #1e2130;
-            --card2: #252839;
-            --border: #2a2d3e;
-            --border2: #363a50;
-            --fg: #e4e6f0;
-            --fg2: #c0c3d4;
-            --muted: #6b7094;
-            --accent: #e8a030;
-            --accent2: #d4891a;
-            --accentBg: rgba(232,160,48,0.1);
-            --accentBorder: rgba(232,160,48,0.25);
-            --green: #3dd68c;
-            --greenBg: rgba(61,214,140,0.1);
-            --red: #f06060;
-            --redBg: rgba(240,96,96,0.1);
-            --blue: #5ea8f0;
-            --blueBg: rgba(94,168,240,0.1);
-            --purple: #a78bfa;
-            --purpleBg: rgba(167,139,250,0.1);
-            --pink: #f472b6;
-            --pinkBg: rgba(244,114,182,0.1);
+            --bg:#0d0f14;--bg2:#131620;--bg3:#1a1d2a;--card:#1e2130;--card2:#252839;
+            --border:#282c40;--border2:#363b54;--fg:#e4e6f0;--fg2:#b8bdd4;--muted:#5e6384;
+            --accent:#e8a030;--accent2:#cc8820;--accentBg:rgba(232,160,48,.1);--accentBdr:rgba(232,160,48,.3);
+            --green:#34d399;--greenBg:rgba(52,211,153,.12);
+            --red:#f06060;--redBg:rgba(240,96,96,.12);
+            --blue:#60a5fa;--blueBg:rgba(96,165,250,.12);
+            --purple:#a78bfa;--purpleBg:rgba(167,139,250,.12);
+            --pink:#f472b6;--pinkBg:rgba(244,114,182,.12);
+            --teal:#2dd4bf;--tealBg:rgba(45,212,191,.12);
         }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--fg);overflow:hidden;height:100vh}
+        .mono{font-family:'JetBrains Mono',monospace}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+        ::-webkit-scrollbar-thumb:hover{background:var(--muted)}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        .sidebar{width:272px;min-width:272px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh}
+        .nb-item{padding:10px 14px;cursor:pointer;transition:all .2s;border-left:3px solid transparent;display:flex;align-items:center;gap:10px}
+        .nb-item:hover{background:rgba(255,255,255,.03)}
+        .nb-item.active{background:var(--accentBg);border-left-color:var(--accent)}
+        .nb-item.active .nb-name{color:var(--accent)}
+        .nb-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+        .nb-name{font-size:.88rem;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .nb-meta{font-size:.7rem;color:var(--muted)}
+        .nb-del{opacity:0;color:var(--muted);background:none;border:none;cursor:pointer;font-size:.8rem;transition:all .2s;padding:4px}
+        .nb-item:hover .nb-del{opacity:1}
+        .nb-del:hover{color:var(--red)}
 
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg);
-            color: var(--fg);
-            overflow: hidden;
-            height: 100vh;
-        }
+        .main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+        .toolbar{padding:10px 20px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+        .tb{padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--fg2);cursor:pointer;font-family:'Outfit';font-size:.8rem;font-weight:500;transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+        .tb:hover{border-color:var(--accent);color:var(--accent);background:var(--accentBg)}
+        .tb.dng:hover{border-color:var(--red);color:var(--red);background:var(--redBg)}
+        .tb.pri{background:var(--accent);border-color:var(--accent);color:#000;font-weight:700}
+        .tb.pri:hover{background:var(--accent2)}
+        .sep{width:1px;height:22px;background:var(--border);margin:0 3px}
 
-        h1, h2, h3, h4 { font-family: 'Outfit', sans-serif; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
+        .table-area{flex:1;overflow:auto;padding:20px}
+        table.nt{border-collapse:separate;border-spacing:0;width:100%;min-width:500px}
+        table.nt th{background:var(--card2);border:1px solid var(--border);padding:0;position:sticky;top:0;z-index:10;font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+        table.nt th:first-child{border-top-left-radius:10px}
+        table.nt th:last-child{border-top-right-radius:10px}
+        .th-inner{padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:4px;min-width:80px}
+        .th-inner:hover .th-act{opacity:1}
+        .th-act{display:flex;gap:3px;opacity:0;transition:opacity .2s}
+        .th-btn{width:20px;height:20px;border-radius:4px;border:none;background:rgba(255,255,255,.06);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.6rem;transition:all .15s}
+        .th-btn:hover{background:var(--redBg);color:var(--red)}
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+        table.nt td{border:1px solid var(--border);padding:0;background:var(--card);transition:background .12s}
+        table.nt tr:hover td{background:rgba(255,255,255,.015)}
+        .ci{width:100%;padding:8px 12px;background:transparent;border:none;color:var(--fg);font-family:'Outfit';font-size:.88rem;outline:none;min-height:38px;display:block}
+        .ci:focus{background:rgba(232,160,48,.04);box-shadow:inset 0 0 0 2px var(--accentBdr)}
+        .ci::placeholder{color:var(--border2)}
 
-        /* Sol sidebar */
-        .sidebar {
-            width: 280px;
-            min-width: 280px;
-            background: var(--bg2);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            transition: transform 0.3s ease;
-        }
+        .rn{width:44px;min-width:44px;text-align:center;color:var(--muted);font-size:.72rem;font-family:'JetBrains Mono',monospace;background:var(--bg3)!important;cursor:default;user-select:none;padding:8px 4px!important}
+        .rn-h{width:44px;min-width:44px;background:var(--bg3)!important}
+        .ck-cell{width:40px;min-width:40px;text-align:center;padding:6px!important}
+        .ck{width:18px;height:18px;border-radius:5px;border:2px solid var(--border2);background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .2s;color:transparent;font-size:.6rem}
+        .ck.on{background:var(--green);border-color:var(--green);color:#000}
+        .ck:hover{border-color:var(--green)}
 
-        .notebook-item {
-            padding: 12px 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .notebook-item:hover { background: rgba(255,255,255,0.03); }
-        .notebook-item.active {
-            background: var(--accentBg);
-            border-left-color: var(--accent);
-        }
-        .notebook-item.active .nb-title { color: var(--accent); }
+        .st-badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.73rem;font-weight:600;cursor:pointer;transition:all .15s;user-select:none}
+        .st-badge:hover{filter:brightness(1.2)}
+        .tg-badge{display:inline-block;padding:2px 9px;border-radius:4px;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s;user-select:none}
+        .tg-badge:hover{filter:brightness(1.2)}
 
-        .nb-color {
-            width: 10px; height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
+        .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(5px);z-index:1000;display:none;align-items:center;justify-content:center}
+        .modal-ov.on{display:flex}
+        .modal-bx{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;width:94%;max-width:420px;animation:mIn .25s ease}
+        @keyframes mIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+        .mi{width:100%;padding:9px 13px;background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:8px;font-family:'Outfit';font-size:.92rem;outline:none;transition:border-color .2s}
+        .mi:focus{border-color:var(--accent)}
 
-        /* Əsas məzmun */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        .cpk{display:flex;gap:7px;flex-wrap:wrap}
+        .cd{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s}
+        .cd:hover{transform:scale(1.15)}
+        .cd.on{border-color:#fff;box-shadow:0 0 0 2px var(--bg)}
 
-        /* Toolbar */
-        .toolbar {
-            padding: 12px 24px;
-            background: var(--bg2);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .tool-btn {
-            padding: 7px 14px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--card);
-            color: var(--fg2);
-            cursor: pointer;
-            font-family: 'Outfit';
-            font-size: 0.82rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-        }
-        .tool-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accentBg); }
-        .tool-btn.danger:hover { border-color: var(--red); color: var(--red); background: var(--redBg); }
-        .tool-btn.primary {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: #000;
-            font-weight: 700;
-        }
-        .tool-btn.primary:hover { background: var(--accent2); }
+        .ctx{position:fixed;background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:5px;z-index:900;display:none;min-width:170px;box-shadow:0 8px 28px rgba(0,0,0,.5)}
+        .ctx.on{display:block}
+        .ctx-i{padding:7px 11px;border-radius:5px;cursor:pointer;font-size:.83rem;display:flex;align-items:center;gap:9px;color:var(--fg2);transition:all .12s}
+        .ctx-i:hover{background:var(--accentBg);color:var(--accent)}
+        .ctx-i.dng:hover{background:var(--redBg);color:var(--red)}
+        .ctx-s{height:1px;background:var(--border);margin:3px 7px}
 
-        .tool-sep {
-            width: 1px;
-            height: 24px;
-            background: var(--border);
-            margin: 0 4px;
-        }
+        .sdrop{position:fixed;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:5px;z-index:950;display:none;min-width:135px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+        .sdrop.on{display:block}
+        .sdrop-i{padding:6px 10px;border-radius:5px;cursor:pointer;font-size:.8rem;display:flex;align-items:center;gap:7px;transition:background .12s}
+        .sdrop-i:hover{background:rgba(255,255,255,.05)}
 
-        /* Cədvəl */
-        .table-wrapper {
-            flex: 1;
-            overflow: auto;
-            padding: 24px;
-        }
+        .toast-c{position:fixed;bottom:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:7px}
+        .toast{padding:10px 16px;border-radius:9px;font-weight:600;font-size:.82rem;display:flex;align-items:center;gap:7px;animation:tIn .3s ease,tOut .3s ease 2.5s forwards;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+        .t-ok{background:var(--green);color:#000}.t-er{background:var(--red);color:#fff}.t-in{background:var(--accent);color:#000}
+        @keyframes tIn{from{opacity:0;transform:translateX(50px)}to{opacity:1;transform:none}}
+        @keyframes tOut{to{opacity:0;transform:translateY(8px)}}
 
-        .notebook-table {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100%;
-            min-width: 600px;
-        }
+        .empty-s{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:10px}
+        .empty-s i{font-size:3rem;opacity:.25}
 
-        .notebook-table th {
-            background: var(--card2);
-            padding: 0;
-            border: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            font-weight: 700;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--muted);
-        }
-        .notebook-table th:first-child { border-top-left-radius: 10px; }
-        .notebook-table th:last-child { border-top-right-radius: 10px; }
+        .stat-b{display:flex;gap:14px;padding:8px 20px;background:var(--bg2);border-top:1px solid var(--border);font-size:.75rem;color:var(--muted)}
+        .stat-b span{display:flex;align-items:center;gap:4px}
 
-        .th-content {
-            padding: 10px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 6px;
-            cursor: pointer;
-            min-width: 120px;
-        }
-        .th-content:hover .th-actions { opacity: 1; }
-        .th-actions {
-            display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s;
-        }
-        .th-action-btn {
-            width: 22px; height: 22px;
-            border-radius: 4px;
-            border: none;
-            background: rgba(255,255,255,0.06);
-            color: var(--muted);
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.65rem;
-            transition: all 0.2s;
-        }
-        .th-action-btn:hover { background: var(--redBg); color: var(--red); }
+        .sb-search{position:relative}
+        .sb-search input{width:100%;padding:7px 10px 7px 32px;background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:7px;font-family:'Outfit';font-size:.82rem;outline:none;transition:border-color .2s}
+        .sb-search input:focus{border-color:var(--accent)}
+        .sb-search i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.75rem}
 
-        .notebook-table td {
-            border: 1px solid var(--border);
-            padding: 0;
-            background: var(--card);
-            transition: background 0.15s;
-            position: relative;
-        }
-        .notebook-table tr:hover td { background: rgba(255,255,255,0.015); }
+        .bg-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 15% 85%,rgba(232,160,48,.03) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 85% 15%,rgba(52,211,153,.02) 0%,transparent 50%)}
 
-        .cell-input {
-            width: 100%;
-            padding: 10px 14px;
-            background: transparent;
-            border: none;
-            color: var(--fg);
-            font-family: 'Outfit';
-            font-size: 0.9rem;
-            outline: none;
-            min-height: 42px;
+        @media(max-width:768px){
+            .sidebar{position:fixed;left:0;top:0;z-index:100;transform:translateX(-100%);transition:transform .3s}
+            .sidebar.open{transform:translateX(0)}
+            .mob-tog{display:flex!important}
         }
-        .cell-input:focus {
-            background: rgba(232,160,48,0.04);
-            box-shadow: inset 0 0 0 2px var(--accentBorder);
-        }
-        .cell-input::placeholder { color: var(--border2); }
-
-        /* Sətir nömrəsi */
-        .row-num {
-            width: 48px;
-            min-width: 48px;
-            text-align: center;
-            color: var(--muted);
-            font-size: 0.75rem;
-            font-family: 'JetBrains Mono', monospace;
-            background: var(--bg3) !important;
-            cursor: pointer;
-            user-select: none;
-        }
-        .row-num:hover { color: var(--red); }
-
-        .notebook-table th.row-num-header {
-            width: 48px;
-            min-width: 48px;
-            background: var(--bg3) !important;
-        }
-
-        /* Checkbox hüceyrə */
-        .check-cell {
-            width: 44px; min-width: 44px; text-align: center;
-        }
-        .cell-check {
-            width: 18px; height: 18px;
-            border-radius: 5px;
-            border: 2px solid var(--border2);
-            background: transparent;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            color: transparent;
-            font-size: 0.65rem;
-        }
-        .cell-check.checked {
-            background: var(--green);
-            border-color: var(--green);
-            color: #000;
-        }
-        .cell-check:hover { border-color: var(--green); }
-
-        /* Status badge */
-        .status-badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(6px);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 28px;
-            width: 95%;
-            max-width: 440px;
-            animation: modalIn 0.3s ease;
-        }
-        @keyframes modalIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.97); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .modal-input {
-            width: 100%;
-            padding: 10px 14px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--fg);
-            border-radius: 8px;
-            font-family: 'Outfit';
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .modal-input:focus { border-color: var(--accent); }
-
-        /* Rəng seçici */
-        .color-picker {
-            display: flex; gap: 8px; flex-wrap: wrap;
-        }
-        .color-dot {
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-        }
-        .color-dot:hover { transform: scale(1.15); }
-        .color-dot.active { border-color: var(--fg); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px currentColor; }
-
-        /* Toast */
-        .toast-box {
-            position: fixed; bottom: 24px; right: 24px;
-            z-index: 2000;
-            display: flex; flex-direction: column; gap: 8px;
-        }
-        .toast {
-            padding: 12px 18px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            display: flex; align-items: center; gap: 8px;
-            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-        }
-        .toast-success { background: var(--green); color: #000; }
-        .toast-error { background: var(--red); color: #fff; }
-        .toast-info { background: var(--accent); color: #000; }
-        @keyframes toastIn { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes toastOut { to { opacity: 0; transform: translateY(10px); } }
-
-        /* Status dropdown */
-        .status-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: var(--card2);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 6px;
-            z-index: 50;
-            display: none;
-            min-width: 140px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-        }
-        .status-dropdown.active { display: block; }
-        .status-option {
-            padding: 6px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.82rem;
-            display: flex; align-items: center; gap: 8px;
-            transition: background 0.15s;
-        }
-        .status-option:hover { background: rgba(255,255,255,0.05); }
-
-        /* Context menu */
-        .ctx-menu {
-            position: fixed;
-            background: var(--card2);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 6px;
-            z-index: 900;
-            display: none;
-            min-width: 180px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-        }
-        .ctx-menu.active { display: block; }
-        .ctx-item {
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: flex; align-items: center; gap: 10px;
-            color: var(--fg2);
-            transition: all 0.15s;
-        }
-        .ctx-item:hover { background: var(--accentBg); color: var(--accent); }
-        .ctx-item.danger:hover { background: var(--redBg); color: var(--red); }
-        .ctx-sep { height: 1px; background: var(--border); margin: 4px 8px; }
-
-        /* Axtarış */
-        .search-box {
-            position: relative;
-        }
-        .search-box input {
-            width: 100%;
-            padding: 8px 12px 8px 34px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--fg);
-            border-radius: 8px;
-            font-family: 'Outfit';
-            font-size: 0.85rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .search-box input:focus { border-color: var(--accent); }
-        .search-box i {
-            position: absolute;
-            left: 11px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--muted);
-            font-size: 0.8rem;
-        }
-
-        /* Empty state */
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: var(--muted);
-            gap: 12px;
-        }
-        .empty-state i { font-size: 3.5rem; opacity: 0.3; }
-
-        /* Boş səhifə fon */
-        .bg-pattern {
-            position: absolute; inset: 0;
-            background-image:
-                radial-gradient(circle at 20% 80%, rgba(232,160,48,0.04) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(61,214,140,0.03) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        /* Stat bar */
-        .stat-bar {
-            display: flex; gap: 16px; padding: 10px 24px;
-            background: var(--bg2);
-            border-top: 1px solid var(--border);
-            font-size: 0.78rem;
-            color: var(--muted);
-        }
-        .stat-bar span { display: flex; align-items: center; gap: 4px; }
-
-        /* Tag */
-        .tag {
-            display: inline-flex; align-items: center; gap: 4px;
-            padding: 2px 8px; border-radius: 4px;
-            font-size: 0.72rem; font-weight: 600;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar { position: fixed; left: 0; top: 0; z-index: 100; transform: translateX(-100%); }
-            .sidebar.open { transform: translateX(0); }
-            .mobile-toggle { display: flex !important; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
     </style>
 </head>
 <body>
+<div style="display:flex;height:100vh;position:relative">
+<div class="bg-glow"></div>
 
-<div style="display: flex; height: 100vh; position: relative;">
-    <div class="bg-pattern"></div>
-
-    <!-- SOL SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-        <!-- Logo -->
-        <div style="padding: 20px 16px 12px; border-bottom: 1px solid var(--border);">
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
-                <div style="width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 9px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-book-open" style="color: #000; font-size: 0.9rem;"></i>
-                </div>
-                <div>
-                    <div style="font-weight: 900; font-size: 1.05rem; letter-spacing: -0.3px;">NotDefteri</div>
-                    <div style="font-size: 0.65rem; color: var(--muted);">Cədvəl & Qeydlər</div>
-                </div>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div style="padding:16px 14px 10px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px">
+            <div style="width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center">
+                <i class="fas fa-book-open" style="color:#000;font-size:.85rem"></i>
             </div>
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Dəftər axtar..." id="nbSearch" oninput="filterNotebooks()">
+            <div>
+                <div style="font-weight:900;font-size:1rem;letter-spacing:-.3px">NotDefteri</div>
+                <div style="font-size:.62rem;color:var(--muted)">Cədvəl & Qeydlər</div>
             </div>
         </div>
-
-        <!-- Dəftər siyahısı -->
-        <div style="flex: 1; overflow-y: auto; padding: 8px 0;" id="notebookList"></div>
-
-        <!-- Yeni dəftər düyməsi -->
-        <div style="padding: 12px; border-top: 1px solid var(--border);">
-            <button class="tool-btn primary" style="width: 100%; justify-content: center;" onclick="openNewNBModal()">
-                <i class="fas fa-plus"></i> Yeni Dəftər
-            </button>
+        <div class="sb-search">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Axtar..." id="nbSearch" oninput="renderNBList()">
         </div>
-    </aside>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:6px 0" id="nbList"></div>
+    <div style="padding:10px;border-top:1px solid var(--border)">
+        <button class="tb pri" style="width:100%;justify-content:center" onclick="openNewModal()"><i class="fas fa-plus"></i> Yeni Dəftər</button>
+    </div>
+</aside>
 
-    <!-- ƏSAS MƏZMUN -->
-    <div class="main-content" style="position: relative;">
-        <!-- Mobile toggle -->
-        <button class="tool-btn mobile-toggle" id="mobileToggle" style="display: none; position: absolute; top: 12px; left: 12px; z-index: 50;" onclick="document.getElementById('sidebar').classList.toggle('open')">
-            <i class="fas fa-bars"></i>
-        </button>
+<!-- MAIN -->
+<div class="main">
+    <button class="tb mob-tog" id="mobTog" style="display:none;position:absolute;top:10px;left:10px;z-index:50" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button>
 
-        <!-- Toolbar -->
-        <div class="toolbar" id="toolbar" style="display: none;">
-            <span style="font-weight: 700; font-size: 1.05rem; margin-right: 8px;" id="currentNBName"></span>
-            <div class="tool-sep"></div>
+    <div class="toolbar" id="toolbar" style="display:none">
+        <span style="font-weight:700;font-size:1rem;margin-right:6px" id="nbTitle"></span>
+        <div class="sep"></div>
+        <button class="tb" onclick="addRow()"><i class="fas fa-plus"></i> Sətir</button>
+        <button class="tb" onclick="openColModal()"><i class="fas fa-columns"></i> Sütun</button>
+        <div class="sep"></div>
+        <button class="tb" onclick="addCol('check')"><i class="far fa-check-square"></i> Checkbox</button>
+        <button class="tb" onclick="addCol('status')"><i class="fas fa-flag"></i> Status</button>
+        <button class="tb" onclick="addCol('tag')"><i class="fas fa-tag"></i> Etiket</button>
+        <div class="sep"></div>
+        <button class="tb" onclick="openRenameModal()"><i class="fas fa-pen"></i></button>
+        <button class="tb" onclick="dupNB()"><i class="fas fa-copy"></i></button>
+        <button class="tb dng" onclick="clearTbl()"><i class="fas fa-eraser"></i></button>
+        <button class="tb dng" onclick="delNB()"><i class="fas fa-trash"></i></button>
+        <div style="flex:1"></div>
+        <button class="tb" onclick="exportCSV()"><i class="fas fa-download"></i> CSV</button>
+    </div>
 
-            <button class="tool-btn" onclick="addRow()" title="Sətir əlavə et">
-                <i class="fas fa-plus"></i> Sətir
-            </button>
-            <button class="tool-btn" onclick="addColumn()" title="Sütun əlavə et">
-                <i class="fas fa-columns"></i> Sütun
-            </button>
-            <div class="tool-sep"></div>
-
-            <button class="tool-btn" onclick="addColumnWithType('check')" title="Checkbox sütunu">
-                <i class="far fa-check-square"></i> Checkbox
-            </button>
-            <button class="tool-btn" onclick="addColumnWithType('status')" title="Status sütunu">
-                <i class="fas fa-flag"></i> Status
-            </button>
-            <button class="tool-btn" onclick="addColumnWithType('tag')" title="Etiket sütunu">
-                <i class="fas fa-tag"></i> Etiket
-            </button>
-            <div class="tool-sep"></div>
-
-            <button class="tool-btn" onclick="renameNB()" title="Adını dəyiş">
-                <i class="fas fa-pen"></i>
-            </button>
-            <button class="tool-btn" onclick="duplicateNB()" title="Kopyala">
-                <i class="fas fa-copy"></i>
-            </button>
-            <button class="tool-btn danger" onclick="clearTable()" title="Cədvəli təmizlə">
-                <i class="fas fa-eraser"></i>
-            </button>
-            <button class="tool-btn danger" onclick="deleteNB()" title="Dəftəri sil">
-                <i class="fas fa-trash"></i>
-            </button>
-
-            <div style="flex: 1;"></div>
-
-            <button class="tool-btn" onclick="exportCSV()" title="CSV kimi yüklə">
-                <i class="fas fa-download"></i> CSV
-            </button>
+    <div class="table-area" id="tableArea">
+        <div class="empty-s" id="emptyState">
+            <i class="fas fa-book-open"></i>
+            <div style="font-size:1.05rem;font-weight:600">Dəftər seçin və ya yaradın</div>
+            <div style="font-size:.83rem;max-width:280px;text-align:center;line-height:1.5">Sol paneldən dəftər seçə və ya "Yeni Dəftər" düyməsi ilə başlayın</div>
         </div>
+        <div id="tblWrap" style="display:none"></div>
+    </div>
 
-        <!-- Cədvəl bölməsi -->
-        <div class="table-wrapper" id="tableWrapper">
-            <div class="empty-state" id="emptyState">
-                <i class="fas fa-book-open"></i>
-                <div style="font-size: 1.1rem; font-weight: 600;">Dəftər seçin və ya yaradın</div>
-                <div style="font-size: 0.85rem; max-width: 300px; text-align: center; line-height: 1.5;">
-                    Sol paneldən mövcud dəftəri seçə və ya "Yeni Dəftər" düyməsi ilə öz cədvəlinizi yaradın
-                </div>
-            </div>
-            <div id="tableContainer" style="display: none;"></div>
+    <div class="stat-b" id="statBar" style="display:none">
+        <span><i class="fas fa-table"></i> <span id="sR">0</span> sətir</span>
+        <span><i class="fas fa-columns"></i> <span id="sC">0</span> sütun</span>
+        <span><i class="fas fa-check-circle"></i> <span id="sCh">0</span> tamamlanıb</span>
+        <div style="flex:1"></div>
+        <span class="mono" style="font-size:.7rem" id="sTime"></span>
+    </div>
+</div>
+</div>
+
+<!-- YENİ DƏFTƏR MODAL -->
+<div class="modal-ov" id="newModal">
+    <div class="modal-bx">
+        <h3 style="font-weight:700;font-size:1.1rem;margin-bottom:18px">Yeni Dəftər Yarat</h3>
+        <div style="margin-bottom:14px">
+            <label style="font-size:.75rem;color:var(--muted);margin-bottom:5px;display:block">Dəftərin adı</label>
+            <input type="text" class="mi" id="newName" placeholder="Məs: Gündəlik tapşırıqlar" maxlength="40">
         </div>
-
-        <!-- Status bar -->
-        <div class="stat-bar" id="statBar" style="display: none;">
-            <span><i class="fas fa-table"></i> <span id="statRows">0</span> sətir</span>
-            <span><i class="fas fa-columns"></i> <span id="statCols">0</span> sütun</span>
-            <span><i class="fas fa-check-circle"></i> <span id="statChecked">0</span> tamamlanıb</span>
-            <div style="flex: 1;"></div>
-            <span class="mono" style="font-size: 0.72rem;" id="statSaved"></span>
+        <div style="margin-bottom:14px">
+            <label style="font-size:.75rem;color:var(--muted);margin-bottom:7px;display:block">Rəng</label>
+            <div class="cpk" id="cPicker"></div>
+        </div>
+        <div style="margin-bottom:18px">
+            <label style="font-size:.75rem;color:var(--muted);margin-bottom:5px;display:block">Başlanğıc sütun sayı</label>
+            <input type="number" class="mi" id="newCols" value="3" min="1" max="20" style="width:80px">
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="tb" onclick="closeM('newModal')">Ləğv et</button>
+            <button class="tb pri" onclick="createNB()">Yarat</button>
         </div>
     </div>
 </div>
 
-<!-- Yeni Dəftər Modal -->
-<div class="modal-overlay" id="newNBModal">
-    <div class="modal-box">
-        <h3 style="font-weight: 700; font-size: 1.15rem; margin-bottom: 20px;">Yeni Dəftər Yarat</h3>
-        <div style="margin-bottom: 16px;">
-            <label style="font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; display: block;">Dəftərin adı</label>
-            <input type="text" class="modal-input" id="newNBName" placeholder="Məs: Gündəlik tapşırıqlar" maxlength="40" onkeydown="if(event.key==='Enter')createNB()">
+<!-- SÜTUN ƏLAVƏ MODAL -->
+<div class="modal-ov" id="colModal">
+    <div class="modal-bx">
+        <h3 style="font-weight:700;font-size:1.1rem;margin-bottom:18px">Sütun Əlavə Et</h3>
+        <div style="margin-bottom:14px">
+            <label style="font-size:.75rem;color:var(--muted);margin-bottom:5px;display:block">Sütun adı</label>
+            <input type="text" class="mi" id="colName" placeholder="Məs: Məbləğ" maxlength="30">
         </div>
-        <div style="margin-bottom: 20px;">
-            <label style="font-size: 0.78rem; color: var(--muted); margin-bottom: 8px; display: block;">Rəng</label>
-            <div class="color-picker" id="colorPicker"></div>
+        <div style="margin-bottom:18px">
+            <label style="font-size:.75rem;color:var(--muted);margin-bottom:7px;display:block">Növ</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap" id="colTypePicker"></div>
         </div>
-        <div style="margin-bottom: 20px;">
-            <label style="font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; display: block;">Sütun sayı (başlanğıc)</label>
-            <input type="number" class="modal-input" id="newNBCols" value="4" min="1" max="20" style="width: 80px;">
-        </div>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-            <button class="tool-btn" onclick="closeModal('newNBModal')">Ləğv et</button>
-            <button class="tool-btn primary" onclick="createNB()">Yarat</button>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="tb" onclick="closeM('colModal')">Ləğv et</button>
+            <button class="tb pri" onclick="confirmAddCol()">Əlavə et</button>
         </div>
     </div>
 </div>
 
-<!-- Ad Dəyişdirmə Modal -->
-<div class="modal-overlay" id="renameModal">
-    <div class="modal-box">
-        <h3 style="font-weight: 700; font-size: 1.15rem; margin-bottom: 20px;">Dəftəri Adlandır</h3>
-        <div style="margin-bottom: 20px;">
-            <input type="text" class="modal-input" id="renameInput" maxlength="40" onkeydown="if(event.key==='Enter')confirmRename()">
+<!-- AD DƏYİŞDİRMƏ MODAL -->
+<div class="modal-ov" id="renameModal">
+    <div class="modal-bx">
+        <h3 style="font-weight:700;font-size:1.1rem;margin-bottom:18px">Adını Dəyiş</h3>
+        <div style="margin-bottom:18px">
+            <input type="text" class="mi" id="renameIn" maxlength="40">
         </div>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-            <button class="tool-btn" onclick="closeModal('renameModal')">Ləğv et</button>
-            <button class="tool-btn primary" onclick="confirmRename()">Yadda Saxla</button>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="tb" onclick="closeM('renameModal')">Ləğv et</button>
+            <button class="tb pri" onclick="confirmRename()">Saxla</button>
         </div>
     </div>
 </div>
 
-<!-- Context Menu -->
-<div class="ctx-menu" id="ctxMenu">
-    <div class="ctx-item" onclick="ctxAction('insertAbove')"><i class="fas fa-arrow-up" style="width:16px;"></i> Yuxarı əlavə et</div>
-    <div class="ctx-item" onclick="ctxAction('insertBelow')"><i class="fas fa-arrow-down" style="width:16px;"></i> Aşağı əlavə et</div>
-    <div class="ctx-sep"></div>
-    <div class="ctx-item" onclick="ctxAction('duplicateRow')"><i class="fas fa-copy" style="width:16px;"></i> Sətiri kopyala</div>
-    <div class="ctx-sep"></div>
-    <div class="ctx-item danger" onclick="ctxAction('deleteRow')"><i class="fas fa-trash" style="width:16px;"></i> Sətiri sil</div>
+<!-- CONTEXT MENU -->
+<div class="ctx" id="ctxMenu">
+    <div class="ctx-i" onclick="ctxDo('above')"><i class="fas fa-arrow-up" style="width:14px"></i> Yuxarı əlavə et</div>
+    <div class="ctx-i" onclick="ctxDo('below')"><i class="fas fa-arrow-down" style="width:14px"></i> Aşağı əlavə et</div>
+    <div class="ctx-s"></div>
+    <div class="ctx-i" onclick="ctxDo('dup')"><i class="fas fa-copy" style="width:14px"></i> Sətiri kopyala</div>
+    <div class="ctx-s"></div>
+    <div class="ctx-i dng" onclick="ctxDo('del')"><i class="fas fa-trash" style="width:14px"></i> Sətiri sil</div>
 </div>
 
-<!-- Status Dropdown -->
-<div class="status-dropdown" id="statusDropdown"></div>
+<!-- STATUS DROPDOWN -->
+<div class="sdrop" id="sDrop"></div>
 
-<!-- Toast -->
-<div class="toast-box" id="toastBox"></div>
+<!-- TOAST -->
+<div class="toast-c" id="toastC"></div>
 
 <script>
-// ==================== RƏNGLƏR ====================
-const COLORS = [
-    { name: 'Amber', value: '#e8a030' },
-    { name: 'Yaşıl', value: '#3dd68c' },
-    { name: 'Mavi', value: '#5ea8f0' },
-    { name: 'Qırmızı', value: '#f06060' },
-    { name: 'Bənövşəyi', value: '#a78bfa' },
-    { name: 'Çəhrayı', value: '#f472b6' },
-    { name: 'Turkuaz', value: '#2dd4bf' },
-    { name: 'Narıncı', value: '#fb923c' },
-];
-
+// ==================== KONSTANTLAR ====================
+const COLORS = ['#e8a030','#34d399','#60a5fa','#f06060','#a78bfa','#f472b6','#2dd4bf','#fb923c'];
 const STATUSES = [
-    { label: 'Gözləyir', color: 'var(--accent)', bg: 'var(--accentBg)' },
-    { label: 'İrəliləyir', color: 'var(--blue)', bg: 'var(--blueBg)' },
-    { label: 'Tamamlandı', color: 'var(--green)', bg: 'var(--greenBg)' },
-    { label: 'Ləğv edildi', color: 'var(--red)', bg: 'var(--redBg)' },
-    { label: 'Gecikir', color: 'var(--pink)', bg: 'var(--pinkBg)' },
-    { label: 'Qeyd', color: 'var(--purple)', bg: 'var(--purpleBg)' },
+    {l:'Gözləyir',c:'var(--accent)',bg:'var(--accentBg)'},
+    {l:'İrəliləyir',c:'var(--blue)',bg:'var(--blueBg)'},
+    {l:'Tamamlandı',c:'var(--green)',bg:'var(--greenBg)'},
+    {l:'Ləğv edildi',c:'var(--red)',bg:'var(--redBg)'},
+    {l:'Gecikir',c:'var(--pink)',bg:'var(--pinkBg)'},
+    {l:'Qeyd',c:'var(--purple)',bg:'var(--purpleBg)'},
 ];
-
 const TAGS = [
-    { label: 'Vacib', color: 'var(--red)', bg: 'var(--redBg)' },
-    { label: 'Orta', color: 'var(--accent)', bg: 'var(--accentBg)' },
-    { label: 'Aşağı', color: 'var(--blue)', bg: 'var(--blueBg)' },
-    { label: 'Şəxsi', color: 'var(--purple)', bg: 'var(--purpleBg)' },
-    { label: 'İş', color: 'var(--green)', bg: 'var(--greenBg)' },
+    {l:'Vacib',c:'var(--red)',bg:'var(--redBg)'},
+    {l:'Orta',c:'var(--accent)',bg:'var(--accentBg)'},
+    {l:'Aşağı',c:'var(--blue)',bg:'var(--blueBg)'},
+    {l:'Şəxsi',c:'var(--purple)',bg:'var(--purpleBg)'},
+    {l:'İş',c:'var(--green)',bg:'var(--greenBg)'},
+];
+const COL_TYPES = [
+    {v:'text',l:'Mətn',i:'fa-font'},
+    {v:'check',l:'Checkbox',i:'fa-check-square'},
+    {v:'status',l:'Status',i:'fa-flag'},
+    {v:'tag',l:'Etiket',i:'fa-tag'},
 ];
 
 // ==================== VƏZİYYƏT ====================
-let notebooks = [];
-let activeNBId = null;
-let selectedColor = COLORS[0].value;
-let ctxRowIndex = -1;
-let activeStatusCell = null;
+let NBs = []; // notebooks
+let aId = null; // active notebook id
+let selColor = COLORS[0];
+let selColType = 'text';
+let ctxRI = -1; // context menu row index
+let stCell = null; // active status/tag cell info {ri, ci}
 
-// ==================== İNİSİALİZASİYA ====================
-document.addEventListener('DOMContentLoaded', () => {
-    loadFromStorage();
-    if (notebooks.length === 0) {
-        // Nümunə dəftərlər yarat
-        notebooks = getSampleData();
-        saveToStorage();
-    }
-    renderNotebookList();
-    initColorPicker();
+// ==================== YARDIMÇILAR ====================
+function uid(){return Date.now().toString(36)+Math.random().toString(36).substr(2,6)}
+function gNB(){return NBs.find(n=>n.id===aId)}
+function save(){try{localStorage.setItem('nd_data',JSON.stringify(NBs))}catch(e){}}
+function load(){try{const d=localStorage.getItem('nd_data');if(d)NBs=JSON.parse(d)}catch(e){NBs=[]}}
+function toast(m,t='t-in'){const c=document.getElementById('toastC'),e=document.createElement('div');e.className='toast '+t;const i=t==='t-ok'?'fa-check-circle':t==='t-er'?'fa-exclamation-circle':'fa-info-circle';e.innerHTML=`<i class="fas ${i}"></i> ${m}`;c.appendChild(e);setTimeout(()=>e.remove(),3000)}
+function closeM(id){document.getElementById(id).classList.remove('on')}
+function fmtTime(ts){if(!ts)return '';const d=new Date(ts);return d.toLocaleDateString('az-AZ',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('az-AZ',{hour:'2-digit',minute:'2-digit'})}
 
-    // Kliklə context menu və status dropdown bağla
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.ctx-menu')) {
-            document.getElementById('ctxMenu').classList.remove('active');
-        }
-        if (!e.target.closest('.status-dropdown') && !e.target.closest('.status-badge')) {
-            document.getElementById('statusDropdown').classList.remove('active');
-            activeStatusCell = null;
-        }
-    });
-
-    // Mobile toggle göstər
-    if (window.innerWidth <= 768) {
-        document.getElementById('mobileToggle').style.display = 'flex';
-    }
-    window.addEventListener('resize', () => {
-        document.getElementById('mobileToggle').style.display = window.innerWidth <= 768 ? 'flex' : 'none';
-    });
-});
-
-// ==================== NÜMUNƏ MƏLUMATLAR ====================
-function getSampleData() {
-    return [
-        {
-            id: genId(),
-            name: 'Gündəlik Tapşırıqlar',
-            color: '#3dd68c',
-            columns: [
-                { id: genId(), type: 'check', name: '', width: 44 },
-                { id: genId(), type: 'text', name: 'Tapşırıq', width: 300 },
-                { id: genId(), type: 'status', name: 'Status', width: 140 },
-                { id: genId(), type: 'tag', name: 'Prioritet', width: 120 },
-                { id: genId(), type: 'text', name: 'Qeyd', width: 200 },
-            ],
-            rows: [
-                { id: genId(), cells: { [getColIdx(0)]: false, [getColIdx(1)]: 'Sayt dizaynını bitir', [getColIdx(2)]: 'İrəliləyir', [getColIdx(3)]: 'Vacib', [getColIdx(4)]: 'Bu həftə sonuna qədər' } },
-                { id: genId(), cells: { [getColIdx(0)]: false, [getColIdx(1)]: 'Müştəri ilə görüş', [getColIdx(2)]: 'Gözləyir', [getColIdx(3)]: 'Orta', [getColIdx(4)]: 'Çərşənbə axşamı 15:00' } },
-                { id: genId(), cells: { [getColIdx(0)]: true, [getColIdx(1)]: 'Hesabat hazırla', [getColIdx(2)]: 'Tamamlandı', [getColIdx(3)]: 'Vacib', [getColIdx(4)]: '' } },
-                { id: genId(), cells: { [getColIdx(0)]: false, [getColIdx(1)]: 'Yeni işçiləri təlim et', [getColIdx(2)]: 'Gözləyir', [getColIdx(3)]: 'Aşağı', [getColIdx(4)]: 'Növbəti həftə' } },
-                { id: genId(), cells: { [getColIdx(0)]: false, [getColIdx(1)]: 'Server backup yarat', [getColIdx(2)]: 'Gecikir', [getColIdx(3)]: 'Vacib', [getColIdx(4)]: 'Dərhal!' } },
-            ],
-            updatedAt: Date.now(),
-        },
-        {
-            id: genId(),
-            name: 'Alış-Veriş Siyahısı',
-            color: '#f472b6',
-            columns: [
-                { id: genId(), type: 'check', name: '', width: 44 },
-                { id: genId(), type: 'text', name: 'Məhsul', width: 280 },
-                { id: genId(), type: 'text', name: 'Miqdar', width: 100 },
-                { id: genId(), type: 'text', name: 'Qiymət', width: 100 },
-            ],
-            rows: [
-                { id: genId(), cells: { [getColIdx(0)]: false, [getColIdx(1)]: 'Süd', [getColIdx(2)]: '2 litr', [getColIdx(3)]: '3.50 AZN' } },
-                { id: genId(), cells: { [getColIdx(0)]: true, [getColIdx(1)]: 'Çörək', [getColIdx(2)]: '1 ədəd', [getColIdx(3)]: '1.20 AZN' } },
-                { id: genId(), cells: { [getColIdx(0)]: false, [getColIdx(1)]: 'Alma', [getColIdx(2)]: '1 kq', [getColIdx(3)]: '4.00 AZN' } },
-            ],
-            updatedAt: Date.now(),
-        },
-        {
-            id: genId(),
-            name: 'Kitab Siyahısı',
-            color: '#5ea8f0',
-            columns: [
-                { id: genId(), type: 'text', name: 'Kitab adı', width: 280 },
-                { id: genId(), type: 'text', name: 'Müəllif', width: 180 },
-                { id: genId(), type: 'status', name: 'Vəziyyət', width: 140 },
-                { id: genId(), type: 'text', name: 'Janr', width: 120 },
-            ],
-            rows: [
-                { id: genId(), cells: { [getColIdx(0)]: '1984', [getColIdx(1)]: 'Corc Oruell', [getColIdx(2)]: 'Tamamlandı', [getColIdx(3)]: 'Dystopia' } },
-                { id: genId(), cells: { [getColIdx(0)]: 'Səfillər', [getColIdx(1)]: 'Viktor Hüqo', [getColIdx(2)]: 'İrəliləyir', [getColIdx(3)]: 'Roman' } },
-                { id: genId(), cells: { [getColIdx(0)]: 'Atomic Habits', [getColIdx(1)]: 'James Clear', [getColIdx(2)]: 'Gözləyir', [getColIdx(3)]: 'Özünüsazlama' } },
-            ],
-            updatedAt: Date.now(),
-        }
-    ];
+// ==================== MODALLAR ====================
+function openNewModal(){
+    document.getElementById('newName').value='';
+    document.getElementById('newCols').value='3';
+    selColor=COLORS[0];
+    renderCPicker();
+    document.getElementById('newModal').classList.add('on');
+    setTimeout(()=>document.getElementById('newName').focus(),100);
 }
 
-// Köməkçi: sütun indeksi yaratmaq üçün (nümunə data üçün)
-let _colCounter = 0;
-function getColIdx(offset) { return 'c' + (_colCounter++ + offset); }
-function resetColCounter() { _colCounter = 0; }
-// Nümunə data yaratmadan əvvəl counter sıfırla
-resetColCounter();
-// getSampleData artıq çağırılıb, lakin problem yaranmasın deyə
-// əslində columns id-lərini cells açarları kimi istifadə edirik
-// Düzəliş: nümunədə columns[0].id kimi istifadə etmək lazımdı
-// Lakin funksiya çağrıldıqda həl
+function openColModal(){
+    document.getElementById('colName').value='';
+    selColType='text';
+    renderColTypePicker();
+    document.getElementById('colModal').classList.add('on');
+    setTimeout(()=>document.getElementById('colName').focus(),100);
+}
+
+function openRenameModal(){
+    const nb=gNB();if(!nb)return;
+    document.getElementById('renameIn').value=nb.name;
+    document.getElementById('renameModal').classList.add('on');
+    setTimeout(()=>{const i=document.getElementById('renameIn');i.focus();i.select()},100);
+}
+
+function renderCPicker(){
+    document.getElementById('cPicker').innerHTML=COLORS.map(c=>
+        `<div class="cd${c===selColor?' on':''}" style="background:${c}" onclick="selColor='${c}';renderCPicker()"></div>`
+    ).join('');
+}
+
+function renderColTypePicker(){
+    document.getElementById('colTypePicker').innerHTML=COL_TYPES.map(t=>
+        `<button class="tb${t.v===selColType?' pri':''}" style="font-size:.78rem" onclick="selColType='${t.v}';renderColTypePicker()"><i class="fas ${t.i}"></i> ${t.l}</button>`
+    ).join('');
+}
+
+// Enter dəstəyi
+document.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){
+        if(document.getElementById('newModal').classList.contains('on'))createNB();
+        else if(document.getElementById('colModal').classList.contains('on'))confirmAddCol();
+        else if(document.getElementById('renameModal').classList.contains('on'))confirmRename();
+    }
+    if(e.key==='Escape'){
+        document.querySelectorAll('.modal-ov.on').forEach(m=>m.classList.remove('on'));
+        document.getElementById('ctxMenu').classList.remove('on');
+        document.getElementById('sDrop').classList.remove('on');
+    }
+});
+
+// ==================== DƏFTƏR ƏMƏLİYYATLARI ====================
+function createNB(){
+    const name=document.getElementById('newName').value.trim();
+    if(!name){toast('Zəhmət olmasa ad daxil edin','t-er');return}
+    const colCount=Math.max(1,Math.min(20,parseInt(document.getElementById('newCols').value)||3));
+    const cols=[];
+    for(let i=0;i<colCount;i++)cols.push({id:uid(),type:'text',name:'Sütun '+(i+1),width:0});
+    const nb={id:uid(),name,color:selColor,columns:cols,rows:[],updatedAt:Date.now()};
+    // 3 boş sətir əlavə et
+    for(let i=0;i<3;i++)nb.rows.push(mkRow(nb));
+    NBs.push(nb);
+    save();
+    closeM('newModal');
+    selectNB(nb.id);
+    renderNBList();
+    toast('Dəftər yaradıldı','t-ok');
+}
+
+function mkRow(nb){
+    const cells=[];
+    nb.columns.forEach(col=>{
+        if(col.type==='check')cells.push(false);
+        else cells.push('');
+    });
+    return{id:uid(),cells};
+}
+
+function selectNB(id){
+    aId=id;
+    renderNBList();
+    renderTable();
+    document.getElementById('sidebar').classList.remove('open');
+}
+
+function delNB(){
+    const nb=gNB();if(!nb)return;
+    NBs=NBs.filter(n=>n.id!==aId);
+    aId=null;
+    save();renderNBList();renderTable();
+    toast('Dəftər silindi','t-in');
+}
+
+function dupNB(){
+    const nb=gNB();if(!nb)return;
+    const copy=JSON.parse(JSON.stringify(nb));
+    copy.id=uid();copy.name=nb.name+' (kopya)';copy.updatedAt=Date.now();
+    // Yeni ID-lər ver
+    copy.columns.forEach(c=>c.id=uid());
+    copy.rows.forEach(r=>{r.id=uid()});
+    NBs.push(copy);save();renderNBList();
+    selectNB(copy.id);
+    toast('Dəftər kopyalandı','t-ok');
+}
+
+function clearTbl(){
+    const nb=gNB();if(!nb)return;
+    nb.rows=[];
+    for(let i=0;i<3;i++)nb.rows.push(mkRow(nb));
+    nb.updatedAt=Date.now();save();renderTable();
+    toast('Cədvəl təmizləndi','t-in');
+}
+
+function confirmRename(){
+    const nb=gNB();if(!nb)return;
+    const v=document.getElementById('renameIn').value.trim();
+    if(!v){toast('Ad boş ola bilməz','t-er');return}
+    nb.name=v;nb.updatedAt=Date.now();
+    save();closeM('renameModal');renderNBList();renderTable();
+    toast('Ad dəyişdirildi','t-ok');
+}
+
+// ==================== SIDEBAR SİYAHISI ====================
+function renderNBList(){
+    const q=(document.getElementById('nbSearch').value||'').toLowerCase();
+    const list=document.getElementById('nbList');
+    const filtered=NBs.filter(n=>n.name.toLowerCase().includes(q));
+    if(filtered.length===0){
+        list.innerHTML=`<div style="padding:20px;text-align:center;color:var(--muted);font-size:.83rem">${NBs.length===0?'Hələ dəftər yoxdur':'Nəticə tapılmadı'}</div>`;
+        return;
+    }
+    list.innerHTML=filtered.map(n=>{
+        const rc=n.rows.length;
+        const checked=n.rows.filter(r=>{
+            return n.columns.some((c,i)=>c.type==='check'&&r.cells[i]===true);
+        }).length;
+        return `<div class="nb-item${n.id===aId?' active':''}" onclick="selectNB('${n.id}')">
+            <div class="nb-dot" style="background:${n.color}"></div>
+            <div style="flex:1;overflow:hidden">
+                <div class="nb-name">${esc(n.name)}</div>
+                <div class="nb-meta">${rc} sətir${checked>0?' · '+checked+' tamamlanıb':''}</div>
+            </div>
+            <button class="nb-del" onclick="event.stopPropagation();aId='${n.id}';delNB()" title="Sil"><i class="fas fa-xmark"></i></button>
+        </div>`;
+    }).join('');
+}
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+// ==================== CƏDVƏL RENDER ====================
+function renderTable(){
+    const nb=gNB();
+    const toolbar=document.getElementById('toolbar');
+    const empty=document.getElementById('emptyState');
+    const wrap=document.getElementById('tblWrap');
+    const stat=document.getElementById('statBar');
+
+    if(!nb){
+        toolbar.style.display='none';
+        empty.style.display='flex';
+        wrap.style.display='none';
+        stat.style.display='none';
+        return;
+    }
+
+    toolbar.style.display='flex';
+    empty.style.display='none';
+    wrap.style.display='block';
+    stat.style.display='flex';
+
+    document.getElementById('nbTitle').textContent=nb.name;
+    document.getElementById('nbTitle').style.color=nb.color;
+
+    // Statistika
+    document.getElementById('sR').textContent=nb.rows.length;
+    document.getElementById('sC').textContent=nb.columns.length;
+    let chk=0;
+    nb.columns.forEach((c,ci)=>{if(c.type==='check')nb.rows.forEach(r=>{if(r.cells[ci])chk++})});
+    document.getElementById('sCh').textContent=chk;
+    document.getElementById('sTime').textContent=fmtTime(nb.updatedAt);
+
+    // Cədvəl HTML
+    let html='<table class="nt"><thead><tr>';
+    // Sətir nömrəsi header
+    html+='<th class="rn-h"></th>';
+    // Sütun headerları
+    nb.columns.forEach((c,ci)=>{
+        const w=c.width?`min-width:${c.width}px`:'';
+        html+=`<th style="${w}"><div class="th-inner">
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(c.name||c.type)}">${c.name?esc(c.name):'&nbsp;'}</span>
+            <div class="th-act">
+                <button class="th-btn" onclick="delCol(${ci})" title="Sil"><i class="fas fa-times"></i></button>
+            </div>
+        </div></th>`;
+    });
+    html+='</tr></thead><tbody>';
+
+    // Sətirlər
+    nb.rows.forEach((row,ri)=>{
+        html+=`<tr oncontextmenu="showCtx(event,${ri})">`;
+        html+=`<td class="rn">${ri+1}</td>`;
+        row.cells.forEach((cell,ci)=>{
+            const col=nb.columns[ci];
+            if(!col)return;
+            html+=`<td class="${col.type==='check'?'ck-cell':''}">`;
+            if(col.type==='check'){
+                html+=`<div class="ck${cell?' on':''}" onclick="togCheck(${ri},${ci})"><i class="fas fa-check"></i></div>`;
+            } else if(col.type==='status'){
+                const st=STATUSES.find(s=>s.l===cell);
+                html+=st
+                    ?`<span class="st-badge" style="color:${st.c};background:${st.bg}" onclick="showStatusDrop(event,${ri},${ci})">${st.l}</span>`
+                    :`<span class="st-badge" style="color:var(--muted);background:var(--bg3);font-style:italic" onclick="showStatusDrop(event,${ri},${ci})">Seç...</span>`;
+            } else if(col.type==='tag'){
+                const tg=TAGS.find(t=>t.l===cell);
+                html+=tg
+                    ?`<span class="tg-badge" style="color:${tg.c};background:${tg.bg}" onclick="showTagDrop(event,${ri},${ci})">${tg.l}</span>`
+                    :`<span class="tg-badge" style="color:var(--muted);background:var(--bg3);font-style:italic" onclick="showTagDrop(event,${ri},${ci})">Seç...</span>`;
+            } else {
+                html+=`<input class="ci" type="text" value="${esc(String(cell))}" placeholder="..." data-r="${ri}" data-c="${ci}" oninput="cellEdit(this)">`;
+            }
+            html+=`</td>`;
+        });
+        html+=`</tr>`;
+    });
+
+    html+='</tbody></table>';
+    wrap.innerHTML=html;
+}
+
+// ==================== HÜCEYRƏ REDAKTƏ ====================
+function cellEdit(el){
+    const nb=gNB();if(!nb)return;
+    const ri=parseInt(el.dataset.r);
+    const ci=parseInt(el.dataset.c);
+    nb.rows[ri].cells[ci]=el.value;
+    nb.updatedAt=Date.now();
+    save();
+    // Stat yenilə (throttle)
+    clearTimeout(cellEdit._t);
+    cellEdit._t=setTimeout(()=>{
+        let chk=0;
+        nb.columns.forEach((c,c2)=>{if(c.type==='check')nb.rows.forEach(r=>{if(r.cells[c2])chk++})});
+        document.getElementById('sCh').textContent=chk;
+        document.getElementById('sTime').textContent=fmtTime(nb.updatedAt);
+        renderNBList();
+    },400);
+}
+
+function togCheck(ri,ci){
+    const nb=gNB();if(!nb)return;
+    nb.rows[ri].cells[ci]=!nb.rows[ri].cells[ci];
+    nb.updatedAt=Date.now();save();renderTable();
+}
+
+// ==================== STATUS & TAG DROPDOWN ====================
+function showStatusDrop(ev,ri,ci){
+    ev.stopPropagation();
+    stCell={ri,ci,type:'status'};
+    const dd=document.getElementById('sDrop');
+    dd.innerHTML=STATUSES.map(s=>
+        `<div class="sdrop-i" onclick="pickStatus('${esc(s.l)}')">
+            <span style="width:8px;height:8px;border-radius:50%;background:${s.c};flex-shrink:0"></span>
+            ${s.l}
+        </div>`
+    ).join('');
+    posDrop(dd,ev);
+    dd.classList.add('on');
+}
+
+function showTagDrop(ev,ri,ci){
+    ev.stopPropagation();
+    stCell={ri,ci,type:'tag'};
+    const dd=document.getElementById('sDrop');
+    dd.innerHTML=TAGS.map(t=>
+        `<div class="sdrop-i" onclick="pickTag('${esc(t.l)}')">
+            <span style="width:8px;height:8px;border-radius:3px;background:${t.c};flex-shrink:0"></span>
+            ${t.l}
+        </div>`
+    ).join('');
+    posDrop(dd,ev);
+    dd.classList.add('on');
+}
+
+function pickStatus(val){
+    const nb=gNB();if(!nb||!stCell)return;
+    nb.rows[stCell.ri].cells[stCell.ci]=val;
+    nb.updatedAt=Date.now();save();renderTable();
+    document.getElementById('sDrop').classList.remove('on');
+}
+
+function pickTag(val){
+    const nb=gNB();if(!nb||!stCell)return;
+    nb.rows[stCell.ri].cells[stCell.ci]=val;
+    nb.updatedAt=Date.now();save();renderTable();
+    document.getElementById('sDrop').classList.remove('on');
+}
+
+function posDrop(dd,ev){
+    let x=ev.clientX,y=ev.clientY;
+    dd.classList.add('on'); // ölçü üçün
+    const r=dd.getBoundingClientRect();
+    if(x+r.width>window.innerWidth-10)x=window.innerWidth-r.width-10;
+    if(y+r.height>window.innerHeight-10)y=window.innerHeight-r.height-10;
+    dd.style.left=x+'px';dd.style.top=y+'px';
+}
+
+// ==================== SƏTİR ƏLAVƏ / SİL ====================
+function addRow(){
+    const nb=gNB();if(!nb)return;
+    nb.rows.push(mkRow(nb));
+    nb.updatedAt=Date.now();save();renderTable();
+    // Son sətirə focus
+    setTimeout(()=>{
+        const inputs=document.querySelectorAll('#tblWrap .ci');
+        if(inputs.length>0)inputs[inputs.length-1].focus();
+    },50);
+}
+
+function insRow(atIdx){
+    const nb=gNB();if(!nb)return;
+    const row=mkRow(nb);
+    nb.rows.splice(atIdx,0,row);
+    nb.updatedAt=Date.now();save();renderTable();
+}
+
+function delRow(idx){
+    const nb=gNB();if(!nb||nb.rows.length<=1)return;
+    nb.rows.splice(idx,1);
+    nb.updatedAt=Date.now();save();renderTable();
+    toast('Sətir silindi','t-in');
+}
+
+function dupRow(idx){
+    const nb=gNB();if(!nb)return;
+    const copy=JSON.parse(JSON.stringify(nb.rows[idx]));
+    copy.id=uid();
+    nb.rows.splice(idx+1,0,copy);
+    nb.updatedAt=Date.now();save();renderTable();
+    toast('Sətir kopyalandı','t-ok');
+}
+
+// ==================== SÜTUN ƏLAVƏ / SİL ====================
+function addCol(type){
+    const nb=gNB();if(!nb)return;
+    const names={check:'',status:'Status',tag:'Etiket',text:'Yeni sütun'};
+    const widths={check:40,status:140,tag:120,text:0};
+    nb.columns.push({id:uid(),type,name:names[type]||'Yeni',width:widths[type]||0});
+    nb.rows.forEach(r=>{
+        if(type==='check')r.cells.push(false);
+        else r.cells.push('');
+    });
+    nb.updatedAt=Date.now();save();renderTable();
+    toast('Sütun əlavə edildi','t-ok');
+}
+
+function openColModal(){
+    selColType='text';
+    document.getElementById('colName').value='';
+    renderColTypePicker();
+    document.getElementById('colModal').classList.add('on');
+    setTimeout(()=>document.getElementById('colName').focus(),100);
+}
+
+function confirmAddCol(){
+    const name=document.getElementById('colName').value.trim();
+    const nb=gNB();if(!nb)return;
+    const widths={check:40,status:140,tag:120,text:0};
+    nb.columns.push({id:uid(),type:selColType,name:name||(selColType==='check'?'':selColType==='status'?'Status':selColType==='tag'?'Etiket':'Sütun'),width:widths[selColType]||0});
+    nb.rows.forEach(r=>{
+        if(selColType==='check')r.cells.push(false);
+        else r.cells.push('');
+    });
+    nb.updatedAt=Date.now();save();closeM('colModal');renderTable();
+    toast('Sütun əlavə edildi','t-ok');
+}
+
+function delCol(ci){
+    const nb=gNB();if(!nb||nb.columns.length<=1)return;
+    nb.columns.splice(ci,1);
+    nb.rows.forEach(r=>r.cells.splice(ci,1));
+    nb.updatedAt=Date.now();save();renderTable();
+    toast('Sütun silindi','t-in');
+}
+
+// ==================== CONTEXT MENU ====================
+function showCtx(ev,ri){
+    ev.preventDefault();ev.stopPropagation();
+    ctxRI=ri;
+    const m=document.getElementById('ctxMenu');
+    let x=ev.clientX,y=ev.clientY;
+    m.classList.add('on');
+    const r=m.getBoundingClientRect();
+    if(x+r.width>window.innerWidth-10)x=window.innerWidth-r.width-10;
+    if(y+r.height>window.innerHeight-10)y=window.innerHeight-r.height-10;
+    m.style.left=x+'px';m.style.top=y+'px';
+}
+
+function ctxDo(act){
+    document.getElementById('ctxMenu').classList.remove('on');
+    if(act==='above')insRow(ctxRI);
+    else if(act==='below')insRow(ctxRI+1);
+    else if(act==='del')delRow(ctxRI);
+    else if(act==='dup')dupRow(ctxRI);
+}
+
+// ==================== CSV EXPORT ====================
+function exportCSV(){
+    const nb=gNB();if(!nb)return;
+    let csv=nb.columns.map(c=>'"'+(c.name||c.type).replace(/"/g,'""')+'"').join(',')+'\n';
+    nb.rows.forEach(r=>{
+        csv+=r.cells.map(c=>{
+            if(typeof c==='boolean')return c?'Bəli':'Xeyr';
+            return '"'+String(c).replace(/"/g,'""')+'"';
+        }).join(',')+'\n';
+    });
+    const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=nb.name.replace(/[^a-zA-Z0-9əƏüÜöÖğĞşıİçÇ\s-]/g,'').trim()+'.csv';
+    a.click();
+    toast('CSV yükləndi','t-ok');
+}
+
+// ==================== İNİSİALİZASİYA ====================
+load();
+if(NBs.length===0){
+    // Nümunə dəftərlər
+    NBs=[
+        {
+            id:uid(),name:'Gündəlik Tapşırıqlar',color:'#34d399',
+            columns:[
+                {id:uid(),type:'check',name:'',width:40},
+                {id:uid(),type:'text',name:'Tapşırıq',width:280},
+                {id:uid(),type:'status',name:'Status',width:140},
+                {id:uid(),type:'tag',name:'Prioritet',width:110},
+                {id:uid(),type:'text',name:'Qeyd',width:200},
+            ],
+            rows:[
+                {id:uid(),cells:[false,'Sayt dizaynını bitir','İrəliləyir','Vacib','Bu həftə sonuna qədər']},
+                {id:uid(),cells:[false,'Müştəri ilə görüş','Gözləyir','Orta','Çərşənbə axşamı 15:00']},
+                {id:uid(),cells:[true,'Hesabat hazırla','Tamamlandı','Vacib','']},
+                {id:uid(),cells:[false,'Yeni işçiləri təlim et','Gözləyir','Aşağı','Növbəti həftə']},
+                {id:uid(),cells:[false,'Server backup yarat','Gecikir','Vacib','Dərhal!']},
+            ],
+            updatedAt:Date.now()
+        },
+        {
+            id:uid(),name:'Alış-Veriş Siyahısı',color:'#f472b6',
+            columns:[
+                {id:uid(),type:'check',name:'',width:40},
+                {id:uid(),type:'text',name:'Məhsul',width:260},
+                {id:uid(),type:'text',name:'Miqdar',width:100},
+                {id:uid(),type:'text',name:'Qiymət',width:100},
+            ],
+            rows:[
+                {id:uid(),cells:[false,'Süd','2 litr','3.50 AZN']},
+                {id:uid(),cells:[true,'Çörək','1 ədəd','1.20 AZN']},
+                {id:uid(),cells:[false,'Alma','1 kq','4.00 AZN']},
+                {id:uid(),cells:[false,'Yumurta','10 ədəd','2.80 AZN']},
+            ],
+            updatedAt:Date.now()
+        },
+        {
+            id:uid(),name:'Kitab Siyahısı',color:'#60a5fa',
+            columns:[
+                {id:uid(),type:'text',name:'Kitab adı',width:260},
+                {id:uid(),type:'text',name:'Müəllif',width:180},
+                {id:uid(),type:'status',name:'Vəziyyət',width:140},
+                {id:uid(),type:'tag',name:'Janr',width:110},
+            ],
+            rows:[
+                {id:uid(),cells:['1984','Corc Oruell','Tamamlandı','Şəxsi']},
+                {id:uid(),cells:['Səfillər','Viktor Hüqo','İrəliləyir','Şəxsi']},
+                {id:uid(),cells:['Atomic Habits','James Clear','Gözləyir','İş']},
+            ],
+            updatedAt:Date.now()
+        }
+    ];
+    save();
+}
+renderNBList();
+renderCPicker();
+renderColTypePicker();
+
+// Kliklə dropdown bağla
+document.addEventListener('click',e=>{
+    if(!e.target.closest('.ctx'))document.getElementById('ctxMenu').classList.remove('on');
+    if(!e.target.closest('.sdrop')&&!e.target.closest('.st-badge')&&!e.target.closest('.tg-badge')){
+        document.getElementById('sDrop').classList.remove('on');stCell=null;
+    }
+});
+
+// Overlay-ə kliklə modal bağla
+document.querySelectorAll('.modal-ov').forEach(m=>{
+    m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on')});
+});
+</script>
+</body>
+</html>
